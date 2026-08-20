@@ -18,6 +18,7 @@ volume, average price, volatility
 
 Phase 4   Rule-based anomaly detection
 price/volume spikes etc.
+✅ DONE, (check for fine-tuning, TODO: timestamps instead of TradesWithNoSpikes and add adjustability with default values for the general setup)
 
 Phase 5   PostgreSQL persistence
 store aggregated metrics + anomalies
@@ -42,3 +43,5 @@ README + measured performance numbers
     volatility is calculated over the sqrt(variance of returns)
 
  - #metrics# as monitor: in order to prevent race condition we synchronize all threads with #metrics# as shared monitor
+
+ - double can store 64b values and float only 32b!!!

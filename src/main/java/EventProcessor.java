@@ -9,11 +9,13 @@ public class EventProcessor implements Runnable{
     private LinkedBlockingQueue<TradeEvent> queue;
     private PipelineMetricsPerMinute metrics;
     private Deque<TradeEvent> window;
+    private AnomalyDetector anomalyDetector;
 
     public EventProcessor(LinkedBlockingQueue<TradeEvent> queue, PipelineMetricsPerMinute metrics) {
         this.queue = queue;
         this.metrics = metrics;
         this.window = new ArrayDeque<>();
+        this.anomalyDetector = new AnomalyDetector();
     }
 
     @Override
@@ -39,19 +41,28 @@ public class EventProcessor implements Runnable{
 
     private void windowCalc() throws InterruptedException {
         TradeEvent te = queue.take(); // waits if queue is empty (MAY BLOCK OTHER THREADS)
+
+        //Anomaly Handling
+        AnomalyEvent event = anomalyDetector.detectAnomaly(te, metrics, 5);
+        if (event != null && metrics.getTradesWithNoSpike() > 10) {
+            System.out.println(event);
+            metrics.resetTWNS();
+        }
+
         window.offer(te);
         metrics.incProcessedEvents();
         metrics.incTradeCount();
-        metrics.addPrice(te.getPrice().floatValue());
-        metrics.addVolume(te.getQuantity().floatValue());
+        metrics.incTradesWithNoSpike();
+        metrics.addPrice(te.getPrice().doubleValue());
+        metrics.addVolume(te.getQuantity().doubleValue());
         if (metrics.getLastPrice() != 0) {
-            float last = metrics.getLastPrice();
-            float cur = te.getPrice().floatValue();
-            float ret = (cur - last) / last;
-            metrics.addExpVal(ret);
+            double last = metrics.getLastPrice();
+            double cur = te.getPrice().doubleValue();
+            double ret = (cur - last) / last;
+            metrics.addRetExpVal(ret);
             // ret = (price(i) - price(i-1))/price(i-1)
         }
-        metrics.setLastPrice(te.getPrice().floatValue());
+        metrics.setLastPrice(te.getPrice().doubleValue());
 
 
         //what if metrics called here, when the window has new elements but isn't cleaned from the old ones?
@@ -61,16 +72,16 @@ public class EventProcessor implements Runnable{
         //window is a +Deque+ works as FIFO, i.e. peek == peekFirst == oldest element, peekLast == lastly added element
         while (timeDiff.toSeconds() > 60) {
             TradeEvent old = window.pollFirst();
-            metrics.subPrice(old.getPrice().floatValue());
+            metrics.subPrice(old.getPrice().doubleValue());
             metrics.decTradeCount();
-            metrics.subVolume(old.getQuantity().floatValue());
+            metrics.subVolume(old.getQuantity().doubleValue());
             TradeEvent cur = window.peekFirst();
             if (cur != null) {
                 timeDiff = Duration.between(cur.getTimeStamp(), window.peekLast().getTimeStamp());
-                float crn = cur.getPrice().floatValue();
-                float last = old.getPrice().floatValue();
-                float ret = (crn - last) / last;
-                metrics.subExpVal(ret);
+                double crn = cur.getPrice().doubleValue();
+                double last = old.getPrice().doubleValue();
+                double ret = (crn - last) / last;
+                metrics.subRetExpVal(ret);
             }
             else break;
         }
