@@ -1,0 +1,44 @@
+Project Conception:
+
+Phase 1A  Basic ingestion
+WebSocket → TradeEvent → Queue → Processor
+✅ DONE
+
+Phase 1B  Reliability & observability
+backpressure, counters, malformed data, health logging, shutdown
+✅ DONE
+
+Phase 2   In-memory event processing
+60s time window
+✅ DONE
+
+Phase 3   Market metrics
+volume, average price, volatility
+✅ DONE, (check for fine-tuning)
+
+Phase 4   Rule-based anomaly detection
+price/volume spikes etc.
+
+Phase 5   PostgreSQL persistence
+store aggregated metrics + anomalies
+
+Phase 6   REST + SSE
+historical queries + live updates
+
+Phase 7   Engineering polish
+tests, configuration, load/backpressure testing,
+README + measured performance numbers
+
+
+
+
+
+ - regarding the #Metrics# and the #Window#:
+    #Metrics# gather information about the total working time
+    #Window# gathers infos about 60s price, volume and volatility changes
+
+ - #volatility#: here we take the #volatility of returns#
+    i.e. ri = (P(i) - P(i-1))/P(i-1) - % change of the investment.
+    volatility is calculated over the sqrt(variance of returns)
+
+ - #metrics# as monitor: in order to prevent race condition we synchronize all threads with #metrics# as shared monitor
