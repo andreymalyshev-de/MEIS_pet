@@ -46,6 +46,7 @@ public class EventProcessor implements Runnable{
         AnomalyEvent event = anomalyDetector.detectAnomaly(te, metrics, 5);
         if (event != null && metrics.getTradesWithNoSpike() > 10) {
             System.out.println(event);
+            DatabaseClient.insertAnomaly(event);
             metrics.resetTWNS();
         }
 

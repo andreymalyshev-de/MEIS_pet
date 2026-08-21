@@ -1,5 +1,7 @@
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Application {

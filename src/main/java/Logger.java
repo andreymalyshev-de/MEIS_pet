@@ -2,9 +2,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Logger implements Runnable{
     private LinkedBlockingQueue<TradeEvent> queue;
-    private PipelineMetrics metrics;
+    private PipelineMetricsPerMinute metrics;
 
-    public Logger(LinkedBlockingQueue<TradeEvent> queue, PipelineMetrics metrics) {
+    public Logger(LinkedBlockingQueue<TradeEvent> queue, PipelineMetricsPerMinute metrics) {
         this.queue = queue;
         this.metrics = metrics;
     }
@@ -13,11 +13,12 @@ public class Logger implements Runnable{
     public void run() {
         try {
             long startTime = System.nanoTime();
+            Thread.sleep(5000);
             while (true) {
-                Thread.sleep(5000);
                 synchronized (metrics) {
                     writeLog(startTime);
                 }
+                Thread.sleep(30000);
             }
         }
         catch (InterruptedException e) {
@@ -32,5 +33,6 @@ public class Logger implements Runnable{
         System.out.println("processed trades/sec: " + event_delta);
         System.out.println("queue size: " + queue.size());
         System.out.println(metrics.toString());
+        DatabaseClient.insertSnapshot(metrics);
     }
 }

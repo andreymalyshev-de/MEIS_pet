@@ -9,4 +9,5 @@ repositories {
 dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.6'
     implementation 'org.json:json:20260522'
+    implementation 'org.postgresql:postgresql:42.7.7'
 }

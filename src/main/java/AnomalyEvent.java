@@ -19,6 +19,22 @@ public class AnomalyEvent {
         this.timeStamp = timeStamp;
     }
 
+    public Instant getTimeStamp() {
+        return timeStamp;
+    }
+
+    public AnomalyType getType() {
+        return type;
+    }
+
+    public double getChange() {
+        return change;
+    }
+
+    public String getStock() {
+        return stock;
+    }
+
     @Override
     public String toString() {
         return "\n" + type + "\n" + new BigDecimal(Double.toString(change)).stripTrailingZeros().toPlainString() + "%" + "\n"

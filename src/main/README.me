@@ -22,6 +22,7 @@ price/volume spikes etc.
 
 Phase 5   PostgreSQL persistence
 store aggregated metrics + anomalies
+✅ DONE
 
 Phase 6   REST + SSE
 historical queries + live updates
@@ -45,3 +46,23 @@ README + measured performance numbers
  - #metrics# as monitor: in order to prevent race condition we synchronize all threads with #metrics# as shared monitor
 
  - double can store 64b values and float only 32b!!!
+
+ - #SQL# is used here to store and handle historical data, i.e. data that should be kept after the application is stopped
+
+                    """ create table metric_snapshots (
+                    	id SERIAL primary key,
+                    	time_stamp TIMESTAMPTZ,
+                    	symbol varchar(30),
+                    	avgPrice double precision,
+                    	volume double precision,
+                    	volatility double precision,
+                    	tradeCount bigint
+                    );
+
+                    create table anomaly_events (
+                    	id SERIAL primary key,
+                    	time_stamp TIMESTAMPTZ,
+                    	eventType varchar(20),
+                    	symbol varchar(30),
+                    	change double precision
+                    ); """
