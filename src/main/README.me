@@ -1,7 +1,7 @@
 Project Conception:
 
 Phase 1A  Basic ingestion
-WebSocket → TradeEvent → Queue → Processor
+WebSocket → com.market.metrics.model.TradeEvent → Queue → Processor
 ✅ DONE
 
 Phase 1B  Reliability & observability
@@ -24,8 +24,9 @@ Phase 5   PostgreSQL persistence
 store aggregated metrics + anomalies
 ✅ DONE
 
-Phase 6   REST + SSE
+Phase 6   REST + SSE(server sent events)
 historical queries + live updates
+✅ DONE
 
 Phase 7   Engineering polish
 tests, configuration, load/backpressure testing,
@@ -49,20 +50,18 @@ README + measured performance numbers
 
  - #SQL# is used here to store and handle historical data, i.e. data that should be kept after the application is stopped
 
-                    """ create table metric_snapshots (
-                    	id SERIAL primary key,
-                    	time_stamp TIMESTAMPTZ,
-                    	symbol varchar(30),
-                    	avgPrice double precision,
-                    	volume double precision,
-                    	volatility double precision,
-                    	tradeCount bigint
-                    );
+ - phase 6 requires #SpringBoot# - build.gradle defines its presence in the project
 
-                    create table anomaly_events (
-                    	id SERIAL primary key,
-                    	time_stamp TIMESTAMPTZ,
-                    	eventType varchar(20),
-                    	symbol varchar(30),
-                    	change double precision
-                    ); """
+    6A - Rest One-Time Requests:
+    #SpringBoot# scans the package and its sub-packages for classes with bean-annotations (@...)
+    it later creates required beans for the constructors of the main classes and automatically injects them there
+    e.g. @RestController needs a DatabaseClient bean. DB is marked with @Repository -> it will be created
+    and automatically put into the @RestController's constructor when #SpringBoot# automatically
+    creates this class
+    TLDR - #SpringBoot# automatizes creation and injection of instances in the constructors and execution of applications
+
+    6B - SSE Continuous Live-Updates:
+    #SSE# - SpringBoot object that is responsible for one client connection, e.g. one open tab in browser
+    #LiveController# is REST-control class for SSE that opens a connection with subscribe()
+    -> #LiveEventPublisher# is a SB bean that automatically publishes new events when they arrive with publish...()
+    -> from Application it is injected into Logger and EventProcessor
