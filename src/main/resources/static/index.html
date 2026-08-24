@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Market Stream</title>
+
+    <style>
+        :root {
+            --background: #f5f6f8;
+            --panel: #ffffff;
+            --panel-light: #f8f9fb;
+            --border: #e2e6eb;
+            --text: #17191c;
+            --muted: #747b86;
+
+            --green: #198754;
+            --red: #dc3545;
+            --yellow: #b78103;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                    Inter,
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    sans-serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 42px 24px 70px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 38px;
+        }
+
+        .brand {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yellow);
+        }
+
+        .dot.live {
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(86, 216, 156, .5);
+        }
+
+        .dot.offline {
+            background: var(--red);
+        }
+
+        .section-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            margin-bottom: 14px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
+            background: var(--panel);
+            margin-bottom: 28px;
+        }
+
+        .metric {
+            padding: 24px;
+            border-right: 1px solid var(--border);
+        }
+
+        .metric:last-child {
+            border-right: none;
+        }
+
+        .metric-name {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 23px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .metric-updated {
+            margin-top: 8px;
+            color: #606772;
+            font-size: 11px;
+        }
+
+        .anomalies {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            margin-bottom: 52px;
+        }
+
+        .anomaly {
+            display: grid;
+            grid-template-columns: 150px 1fr auto;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .anomaly:last-child {
+            border-bottom: none;
+        }
+
+        .anomaly-type {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .anomaly-type.up {
+            color: var(--green);
+        }
+
+        .anomaly-type.down {
+            color: var(--red);
+        }
+
+        .anomaly-change {
+            font-family: monospace;
+            font-size: 15px;
+        }
+
+        .anomaly-time {
+            color: var(--muted);
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .empty {
+            padding: 26px 20px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 17px;
+            gap: 20px;
+        }
+
+        .history-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .history-description {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            margin-bottom: 14px;
+        }
+
+        select,
+        input,
+        button {
+            height: 38px;
+            border: 1px solid var(--border);
+            background: var(--panel-light);
+            color: var(--text);
+            padding: 0 12px;
+            font: inherit;
+            font-size: 13px;
+        }
+
+        select:focus,
+        input:focus {
+            outline: 1px solid #556070;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 600;
+            background: var(--text);
+            color: var(--background);
+            padding: 0 18px;
+        }
+
+        button:hover {
+            opacity: .88;
+        }
+
+        .date-input {
+            display: none;
+        }
+
+        .date-input.visible {
+            display: block;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: var(--panel);
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 13px 15px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--muted);
+            font-family: inherit;
+            font-weight: 500;
+            background: #0d1015;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--panel-light);
+        }
+
+        #historyStatus {
+            margin: 10px 0;
+            min-height: 18px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 760px) {
+            .metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .metric:nth-child(2) {
+                border-right: none;
+            }
+
+            .metric:nth-child(-n+2) {
+                border-bottom: 1px solid var(--border);
+            }
+
+            .history-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                padding: 25px 14px 50px;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .metric {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .metric:last-child {
+                border-bottom: none;
+            }
+
+            .anomaly {
+                grid-template-columns: 1fr auto;
+                gap: 8px;
+            }
+
+            .anomaly-time {
+                grid-column: 1 / -1;
+            }
+
+            header {
+                align-items: flex-start;
+            }
+
+            .header-right {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <div class="brand">MARKET STREAM</div>
+
+        <div class="header-right">
+            <span>BTC / USDT</span>
+
+            <div class="connection">
+                <span id="connectionDot" class="dot"></span>
+                <span id="connectionText">CONNECTING</span>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- LIVE -->
+
+    <section>
+
+        <div class="section-label">LIVE — 60 SECOND WINDOW</div>
+
+        <div class="metrics">
+
+            <div class="metric">
+                <div class="metric-name">AVG PRICE</div>
+                <div id="avgPrice" class="metric-value">—</div>
+                <div class="metric-updated">USD</div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-name">VOLUME</div>
+                <div id="volume" class="metric-value">—</div>
+                <div class="metric-updated">BTC</div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-name">VOLATILITY</div>
+                <div id="volatility" class="metric-value">—</div>
+                <div class="metric-updated">RETURN</div>
+            </div>
+
+            <div class="metric">
+                <div class="metric-name">TRADES</div>
+                <div id="tradeCount" class="metric-value">—</div>
+                <div id="lastUpdated" class="metric-updated">
+                    waiting for snapshot
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="section-label">RECENT ANOMALIES</div>
+
+        <div id="anomalyList" class="anomalies">
+            <div class="empty">
+                Waiting for anomaly events...
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- HISTORY -->
+
+    <section>
+
+        <div class="history-header">
+            <div>
+                <div class="section-label">DATABASE</div>
+                <h2 class="history-title">History</h2>
+                <div class="history-description">
+                    Query stored market snapshots or anomaly events.
+                </div>
+            </div>
+        </div>
+
+
+        <div class="controls">
+
+            <select id="historyType">
+                <option value="snapshots">Snapshots</option>
+                <option value="anomalies">Anomalies</option>
+            </select>
+
+            <select id="historyMode">
+                <option value="all">All records</option>
+                <option value="range">Timestamp range</option>
+            </select>
+
+            <input
+                    id="fromInput"
+                    class="date-input"
+                    type="datetime-local"
+                    step="1"
+            >
+
+            <input
+                    id="toInput"
+                    class="date-input"
+                    type="datetime-local"
+                    step="1"
+            >
+
+            <button id="queryButton">
+                Query
+            </button>
+
+        </div>
+
+        <div id="historyStatus"></div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody">
+                <tr>
+                    <td>No query performed yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+    /*
+     * LIVE SSE
+     */
+
+    const source = new EventSource("/api/live");
+
+    const connectionDot =
+        document.getElementById("connectionDot");
+
+    const connectionText =
+        document.getElementById("connectionText");
+
+
+    source.onopen = () => {
+        connectionDot.className = "dot live";
+        connectionText.textContent = "LIVE";
+    };
+
+
+    source.addEventListener("metric", event => {
+        const metric = JSON.parse(event.data);
+
+        document.getElementById("avgPrice").textContent =
+            "$" + Number(metric.avgPrice).toLocaleString(
+                undefined,
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+
+        document.getElementById("volume").textContent =
+            Number(metric.volume).toFixed(4);
+
+        document.getElementById("volatility").textContent =
+            (Number(metric.volatility) * 100).toFixed(4) + "%";
+
+        document.getElementById("tradeCount").textContent =
+            Number(metric.tradeCount).toLocaleString();
+
+        document.getElementById("lastUpdated").textContent =
+            "updated " + formatTime(metric.timeStamp);
+    });
+
+
+    const recentAnomalies = [];
+
+    source.addEventListener("anomaly", event => {
+        const anomaly = JSON.parse(event.data);
+
+        recentAnomalies.unshift(anomaly);
+
+        if (recentAnomalies.length > 2) {
+            recentAnomalies.pop();
+        }
+
+        renderAnomalies();
+    });
+
+
+    source.onerror = () => {
+        connectionDot.className = "dot offline";
+        connectionText.textContent = "RECONNECTING";
+    };
+
+
+    function renderAnomalies() {
+        const container =
+            document.getElementById("anomalyList");
+
+        if (recentAnomalies.length === 0) {
+            container.innerHTML =
+                '<div class="empty">Waiting for anomaly events...</div>';
+
+            return;
+        }
+
+        container.innerHTML = recentAnomalies
+            .map(anomaly => {
+
+                const isSpike =
+                    anomaly.type === "PRICE_SPIKE";
+
+                const sign =
+                    anomaly.change >= 0 ? "+" : "";
+
+                return `
+                    <div class="anomaly">
+
+                        <div class="anomaly-type ${isSpike ? "up" : "down"}">
+                            ${isSpike ? "↑" : "↓"}
+                            ${anomaly.type.replace("_", " ")}
+                        </div>
+
+                        <div class="anomaly-change">
+                            ${sign}${Number(anomaly.change).toFixed(3)}%
+                        </div>
+
+                        <div class="anomaly-time">
+                            ${formatTime(anomaly.timeStamp)}
+                        </div>
+
+                    </div>
+                `;
+            })
+            .join("");
+    }
+
+
+    /*
+     * HISTORY
+     */
+
+    const historyType =
+        document.getElementById("historyType");
+
+    const historyMode =
+        document.getElementById("historyMode");
+
+    const fromInput =
+        document.getElementById("fromInput");
+
+    const toInput =
+        document.getElementById("toInput");
+
+    const queryButton =
+        document.getElementById("queryButton");
+
+    const historyStatus =
+        document.getElementById("historyStatus");
+
+
+    historyMode.addEventListener("change", () => {
+
+        const showRange =
+            historyMode.value === "range";
+
+        fromInput.classList.toggle(
+            "visible",
+            showRange
+        );
+
+        toInput.classList.toggle(
+            "visible",
+            showRange
+        );
+    });
+
+
+    queryButton.addEventListener("click", loadHistory);
+
+
+    async function loadHistory() {
+
+        const type = historyType.value;
+        const mode = historyMode.value;
+
+        let url = `/api/metrics/${type}`;
+
+        if (mode === "range") {
+
+            if (!fromInput.value || !toInput.value) {
+                historyStatus.textContent =
+                    "Select both timestamps.";
+
+                return;
+            }
+
+            const from =
+                new Date(fromInput.value).toISOString();
+
+            const to =
+                new Date(toInput.value).toISOString();
+
+            url +=
+                `/range?from=${encodeURIComponent(from)}` +
+                `&to=${encodeURIComponent(to)}`;
+        }
+
+
+        historyStatus.textContent = "Loading...";
+
+
+        try {
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            renderHistory(type, data);
+
+            historyStatus.textContent =
+                `${data.length} record${data.length === 1 ? "" : "s"}`;
+
+        } catch (error) {
+
+            historyStatus.textContent =
+                "Query failed: " + error.message;
+        }
+    }
+
+
+    function renderHistory(type, data) {
+
+        const head =
+            document.getElementById("tableHead");
+
+        const body =
+            document.getElementById("tableBody");
+
+
+        if (type === "snapshots") {
+
+            head.innerHTML = `
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>SYMBOL</th>
+                    <th>AVG PRICE</th>
+                    <th>VOLUME</th>
+                    <th>VOLATILITY</th>
+                    <th>TRADES</th>
+                </tr>
+            `;
+
+            body.innerHTML = data
+                .map(row => `
+                    <tr>
+                        <td>${formatDate(row.timeStamp)}</td>
+                        <td>${row.symbol}</td>
+                        <td>$${Number(row.avgPrice).toFixed(2)}</td>
+                        <td>${Number(row.volume).toFixed(4)}</td>
+                        <td>${(Number(row.volatility) * 100).toFixed(4)}%</td>
+                        <td>${row.tradeCount}</td>
+                    </tr>
+                `)
+                .join("");
+
+        } else {
+
+            head.innerHTML = `
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>SYMBOL</th>
+                    <th>TYPE</th>
+                    <th>CHANGE</th>
+                </tr>
+            `;
+
+            body.innerHTML = data
+                .map(row => `
+                    <tr>
+                        <td>${formatDate(row.timeStamp)}</td>
+                        <td>${row.symbol}</td>
+                        <td>${row.type}</td>
+                        <td>
+                            ${row.change >= 0 ? "+" : ""}
+                            ${Number(row.change).toFixed(3)}%
+                        </td>
+                    </tr>
+                `)
+                .join("");
+        }
+
+
+        if (data.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="6">No records found.</td>
+                </tr>
+            `;
+        }
+    }
+
+
+    /*
+     * FORMATTERS
+     */
+
+    function formatTime(timestamp) {
+
+        if (!timestamp) {
+            return "—";
+        }
+
+        return new Date(timestamp)
+            .toLocaleTimeString();
+    }
+
+
+    function formatDate(timestamp) {
+
+        if (!timestamp) {
+            return "—";
+        }
+
+        return new Date(timestamp)
+            .toLocaleString();
+    }
+</script>
+
+</body>
+</html>

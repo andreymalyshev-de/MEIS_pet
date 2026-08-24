@@ -30,11 +30,11 @@ public class BinanceWebSocketClient extends WebSocketClient {
     @Override
     public void onMessage(String s) {
         try {
-            JSONObject jo = new JSONObject(s); // in try so that the exception is caught
+            JSONObject jo = new JSONObject(s);
             TradeEvent tradeEvent = new TradeEvent(jo.getString("s"), jo.getBigDecimal("p"), jo.getBigDecimal("q"), Instant.ofEpochMilli(jo.getLong("T")));
             boolean took = queue.offer(tradeEvent); // offer doesn't block the stream and just passes the events if the queue is full
 
-            // i.e. OutOfMemory prevention with event dropping (metrics?)
+            // i.e. OutOfMemory prevention with event dropping
             if (took) metrics.incEnqueuedEvents();
             else metrics.incDroppedEvents();
         }
@@ -57,10 +57,4 @@ public class BinanceWebSocketClient extends WebSocketClient {
         System.out.println(e.getMessage());
     }
 
-    public static void main(String[] args) throws Exception{
-        BinanceWebSocketClient client = new BinanceWebSocketClient(new URI("wss://stream.binance.com:9443/ws/btcusdt@trade"), new LinkedBlockingQueue<>(), new PipelineMetrics());
-        client.connect();
-        Thread.sleep(4000);
-        client.close();
-    }
 }

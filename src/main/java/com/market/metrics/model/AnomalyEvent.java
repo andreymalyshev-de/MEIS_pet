@@ -11,13 +11,13 @@ public class AnomalyEvent {
 
     private AnomalyType type;
     private double change;
-    private String stock;
+    private String symbol;
     private Instant timeStamp;
 
-    public AnomalyEvent(AnomalyType type, double change, String stock, Instant timeStamp) {
+    public AnomalyEvent(AnomalyType type, double change, String symbol, Instant timeStamp) {
         this.type = type;
         this.change = change;
-        this.stock = stock;
+        this.symbol = symbol;
         this.timeStamp = timeStamp;
     }
 
@@ -33,13 +33,13 @@ public class AnomalyEvent {
         return change;
     }
 
-    public String getStock() {
-        return stock;
+    public String getSymbol() {
+        return symbol;
     }
 
     @Override
     public String toString() {
         return "\n" + type + "\n" + new BigDecimal(Double.toString(change)).stripTrailingZeros().toPlainString() + "%" + "\n"
-                + stock + "\n" + timeStamp.toString() + "\n";
+                + symbol + "\n" + timeStamp.toString() + "\n";
     }
 }

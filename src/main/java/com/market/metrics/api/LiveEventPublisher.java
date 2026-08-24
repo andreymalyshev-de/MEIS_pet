@@ -25,22 +25,21 @@ public class LiveEventPublisher {
     }
 
     public void publishMetric(MetricSnapshot metric) {
-
-        for (SseEmitter emitter: emitters) {
-            try {
-                emitter.send(metric);
-            }
-            catch (IOException e) {
-                emitters.remove(emitter);
-            }
-        }
+        publish("metric", metric);
     }
 
     public void publishAnomaly(AnomalyEvent anomalyEvent) {
+        publish("anomaly", anomalyEvent);
+    }
 
+    public void publish(String eventType, Object data) {
         for (SseEmitter emitter: emitters) {
             try {
-                emitter.send(anomalyEvent);
+                emitter.send(
+                        SseEmitter.event()
+                                .name(eventType)
+                                .data(data)
+                );
             }
             catch (IOException e) {
                 emitters.remove(emitter);

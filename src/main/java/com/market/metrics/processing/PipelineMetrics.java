@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PipelineMetrics {
     // AtomicLong - thread safe
-    private AtomicLong receivedEvents, enqueuedEvents, processedEvents, droppedEvents, malformedEvents, avgPrice, avgVolume, avgVolatility;
+    private AtomicLong receivedEvents, enqueuedEvents, processedEvents, droppedEvents, malformedEvents;
 
     public PipelineMetrics() {
         receivedEvents = new AtomicLong();
@@ -12,9 +12,6 @@ public class PipelineMetrics {
         processedEvents = new AtomicLong();
         droppedEvents = new AtomicLong();
         malformedEvents = new AtomicLong();
-        avgPrice = new AtomicLong();
-        avgVolatility = new AtomicLong();
-        avgVolume = new AtomicLong();
     }
 
     public AtomicLong getDroppedEvents() {

@@ -31,6 +31,7 @@ historical queries + live updates
 Phase 7   Engineering polish
 tests, configuration, load/backpressure testing,
 README + measured performance numbers
+✅ DONE
 
 
 
@@ -65,3 +66,16 @@ README + measured performance numbers
     #LiveController# is REST-control class for SSE that opens a connection with subscribe()
     -> #LiveEventPublisher# is a SB bean that automatically publishes new events when they arrive with publish...()
     -> from Application it is injected into Logger and EventProcessor
+
+ - #SSE Frontend#: source is the SSE HTTP connection and source.addEventListener(...) listens to the upcoming SSE sent events
+    (LiveEventPublisher)
+
+ - fine-tuning:
+    #queue.take()# makes thread wait till the queue isn't empty. If synchronized may cause other threads to wait
+    unnecessarily and affect the speed of the code
+
+    #DB# snapshot insertion can take time -> create a copy of metrics and insert it outside of the synchronized block
+
+    #Anomaly#: 1stly we remove the expired events from the window, so that the anomaly detection us based on the actual events.
+    Then we detect the anomaly of the current event and afterward insert that current event into the window
+S

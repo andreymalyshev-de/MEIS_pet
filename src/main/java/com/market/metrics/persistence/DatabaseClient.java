@@ -1,8 +1,7 @@
-package com.market.metrics.persistance;
+package com.market.metrics.persistence;
 
 import com.market.metrics.model.MetricSnapshot;
 import com.market.metrics.model.AnomalyEvent;
-import com.market.metrics.processing.PipelineMetricsPerMinute;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +9,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
-@Repository // tells that it is functionality part of a bigger SpringBoot application
+@Repository // tells that it is a functionality part(bean) of a bigger SpringBoot application
 public class DatabaseClient {
     private JdbcTemplate jdbcTemplate;
 
@@ -18,15 +17,12 @@ public class DatabaseClient {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public MetricSnapshot insertSnapshot(PipelineMetricsPerMinute metrics) {
+    public void insertSnapshot(MetricSnapshot metricSnapshot) {
         String insert = "insert into metric_snapshots " +
                 "(time_stamp, symbol, avgPrice, volume, volatility, tradeCount)" +
-                "values (NOW(), ?, ?, ?, ?, ?)";
+                "values (?, ?, ?, ?, ?, ?)";
 
-        MetricSnapshot metricSnapshot = new MetricSnapshot(Instant.now(), "BTC", metrics.getAvgPrice(), metrics.getTotalVolume(), metrics.getVolatilityOfReturns(), metrics.getTradeCount());
-
-        jdbcTemplate.update(insert, "BTC", metrics.getAvgPrice(), metrics.getTotalVolume(), metrics.getVolatilityOfReturns(), metrics.getTradeCount());
-        return metricSnapshot;
+        jdbcTemplate.update(insert, Timestamp.from(metricSnapshot.getTimeStamp()), metricSnapshot.getSymbol(), metricSnapshot.getAvgPrice(), metricSnapshot.getVolume(), metricSnapshot.getVolatility(), metricSnapshot.getTradeCount());
     }
 
     public void insertAnomaly(AnomalyEvent anomalyEvent) {
@@ -34,11 +30,11 @@ public class DatabaseClient {
                 "(time_stamp, eventType, symbol, change)" +
                 "values (?, ?, ?, ?)";
 
-        jdbcTemplate.update(insert, Timestamp.from(anomalyEvent.getTimeStamp()), anomalyEvent.getType().toString(), anomalyEvent.getStock(), anomalyEvent.getChange());
+        jdbcTemplate.update(insert, Timestamp.from(anomalyEvent.getTimeStamp()), anomalyEvent.getType().toString(), anomalyEvent.getSymbol(), anomalyEvent.getChange());
     }
 
     public List<MetricSnapshot> selectAllSnapshots() {
-        String sql = "select * from metric_snapshots";
+        String sql = "select * from metric_snapshots order by time_stamp";
 
         return jdbcTemplate.query(sql, (rs, rowNr) -> new MetricSnapshot(
                 rs.getTimestamp("time_stamp").toInstant(),
@@ -66,7 +62,7 @@ public class DatabaseClient {
     }
 
     public List<AnomalyEvent> selectAllAnomalies() {
-        String sql = "select * from anomaly_events";
+        String sql = "select * from anomaly_events order by time_stamp";
 
         return jdbcTemplate.query(sql, (rs, rowNr) -> new AnomalyEvent(
                 AnomalyEvent.AnomalyType.valueOf(rs.getString("eventType")),

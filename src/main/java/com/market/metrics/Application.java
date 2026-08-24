@@ -3,7 +3,7 @@ package com.market.metrics;
 import com.market.metrics.api.LiveEventPublisher;
 import com.market.metrics.ingestion.BinanceWebSocketClient;
 import com.market.metrics.model.TradeEvent;
-import com.market.metrics.persistance.DatabaseClient;
+import com.market.metrics.persistence.DatabaseClient;
 import com.market.metrics.processing.EventProcessor;
 import com.market.metrics.processing.Logger;
 import com.market.metrics.processing.PipelineMetricsPerMinute;

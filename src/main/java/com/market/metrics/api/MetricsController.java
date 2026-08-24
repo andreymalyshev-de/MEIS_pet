@@ -1,7 +1,7 @@
 package com.market.metrics.api;
 
 import com.market.metrics.model.MetricSnapshot;
-import com.market.metrics.persistance.DatabaseClient;
+import com.market.metrics.persistence.DatabaseClient;
 import com.market.metrics.model.AnomalyEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

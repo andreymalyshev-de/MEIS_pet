@@ -25,10 +25,13 @@ public class PipelineMetricsPerMinute extends PipelineMetrics{
 
     public double getVolatilityOfReturns() {
         if (tradeCount < 2) return 0;
+
         double expsq1 = getTotalReturn()/(getTradeCount() - 1);
         double expsq2 = getTotalReturnSq()/(getTradeCount() - 1);
-        double dev = (double)Math.sqrt(expsq2 - (expsq1*expsq1));
-        return dev;
+
+        double variance = expsq2 - (expsq1*expsq1);
+        double deviation = Math.sqrt(Math.max(0, variance));
+        return deviation;
     }
 
     public long getTradeCount() {
@@ -87,7 +90,7 @@ public class PipelineMetricsPerMinute extends PipelineMetrics{
         double mean = totalPrice / tradeCount;
         double variance = totalPriceSq / tradeCount - mean * mean;
 
-        return Math.sqrt(variance);
+        return  Math.sqrt(Math.max(0, variance));
     }
 
     public void addRetExpVal(double ret) {
@@ -115,8 +118,7 @@ public class PipelineMetricsPerMinute extends PipelineMetrics{
     @Override
     public String toString() {
         String s = new BigDecimal(Double.toString(getVolatilityOfReturns() * 100)).toPlainString();
-        //"\nWINDOW SIZE: " + getWindow() +
         return "60s metrics: " + "\navgPrice: " + getAvgPrice() +
-                "\ntradeCount: " + tradeCount + "\nvolume: " + totalVolume + "\nreturn volatility: " + s + " %\n\n"; //+ super.toString();
+                "\ntradeCount: " + tradeCount + "\nvolume: " + totalVolume + "\nreturn volatility: " + s + " %\n\n";
     }
 }
