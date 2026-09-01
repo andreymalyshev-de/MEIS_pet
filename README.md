@@ -70,29 +70,17 @@ The latency benchmark measures the complete local request path:
 
 ## How to run locally
 
+0. Run Docker Desktop
 1. Clone the repository.
 2. Install PostgreSQL.
-3. Fill the PostgreSQL database used by the application, e.g. via
-   
-  INSERT INTO metric_snapshots
-    (time_stamp, symbol, avgPrice, volume, volatility, tradeCount)
-    SELECT
-      NOW() - (i * INTERVAL '30 seconds'),
-      'BTC',
-      60000 + random() * 1000,
-      random() * 20,
-      random() * 0.01,
-      (1000 + random() * 500)::int
-FROM generate_series(1, 100000) AS i;
+3. Create a .env file from .env.example and set a PostgreSQL password
+4. Build and start the application: ```docker compose up --build```
 
-
-5. Adjust the database connection in `application.properties` for your postgreSQL credentials and provide the database password through the `DB_PASSWORD` environment variable for the SyntheticLoadBenchmark test.
-6. Run the Spring Boot application.
-
-The application automatically creates the required tables and indexes on startup.
+The application automatically creates the required tables and indexes on startup.<br>
+To stop the application: ```docker compose down```<br>
+To completely remove the database data: ```docker compose down -v```
 
 Open the dashboard at:
-
 `http://localhost:8080/`
 
 ## Benchmarks
@@ -113,7 +101,22 @@ This generates synthetic `TradeEvent`s at increasing rates and measures:
 
 ### Historical API latency
 
-Before running `PostgresRangeBenchmark`, populate the database with the benchmark dataset and start the normal Spring Boot application.
+Before running `PostgresRangeBenchmark`, populate the database with the benchmark dataset and start the normal Spring Boot application(Docker).
+
+``` 
+populate e.g. via
+
+INSERT INTO metric_snapshots
+(time_stamp, symbol, avgPrice, volume, volatility, tradeCount)
+SELECT
+NOW() - (i * INTERVAL '30 seconds'),
+'BTC',
+60000 + random() * 1000,
+random() * 20,
+random() * 0.01,
+(1000 + random() * 500)::int
+FROM generate_series(1, 100000) AS i;
+```
 
 Then run:
 

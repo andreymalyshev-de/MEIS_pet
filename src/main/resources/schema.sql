@@ -21,3 +21,5 @@ create table if not exists anomaly_events (
 
 create index if not exists idx_anomaly_events_time
     on anomaly_events(time_stamp);
+
+
