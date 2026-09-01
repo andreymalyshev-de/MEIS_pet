@@ -6,7 +6,7 @@ MEIS takes real-time trading data from Binance (currently BTC/USDT trades) and p
 <img width="1332" height="872" alt="image" src="https://github.com/user-attachments/assets/326aa2ea-0d19-42f4-801a-9affaef90432" />
 
 
-## In detail
+## In detail🔎
 
 `BinanceWebSocketClient` connects to the Binance WebSocket API and receives BTC/USDT trades in real time.
 
@@ -36,7 +36,7 @@ The rolling metrics are shared with a separate `Logger` thread. Every 30 seconds
 
 Current metrics and anomalies are published live to the local dashboard through Server-Sent Events (SSE). Historical snapshots and anomalies can be queried through REST endpoints and through the dashboard.
 
-## Stack
+## Stack⚙️
 
 The project is implemented in Java and uses:
 
@@ -46,7 +46,7 @@ The project is implemented in Java and uses:
 - Server-Sent Events (SSE)
 - Binance WebSocket API
 
-## Results
+## Results📋
 
 Synthetic pipeline load tests achieved:
 
@@ -68,7 +68,7 @@ The latency benchmark measures the complete local request path:
 
 `HTTP client -> Spring REST controller -> PostgreSQL -> JSON response`
 
-## How to run locally
+## How to run locally✍🏼
 
 0. Run Docker Desktop
 1. Clone the repository.
@@ -83,7 +83,7 @@ To completely remove the database data: ```docker compose down -v```
 Open the dashboard at:
 `http://localhost:8080/`
 
-## Benchmarks
+## Benchmarks🧪
 
 Benchmark code is located in the `benchmarks` package.
 
